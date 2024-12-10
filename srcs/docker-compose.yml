@@ -45,8 +45,7 @@ services:
       context: requirements/wordpress
       dockerfile: Dockerfile
     depends_on:
-      mariadb:
-        condition: service_healthy
+      - mariadb
     restart: on-failure
     expose: 
       - "9000"
@@ -57,13 +56,13 @@ volumes:
     driver_opts:
       type: 'none'
       o: 'bind'
-      device: '/home/mda-cunh/data/wordpress'
+      device: '/Users/mathieu/mda-cunh/data/mariadb'
   mariadb:
     driver: local
     driver_opts:
       type: 'none'
       o: 'bind'
-      device: '/home/mda-cunh/data/mariadb'
+      device: '/Users/mathieu/mda-cunh/data/mariadb'
 
 networks:
     inception:
