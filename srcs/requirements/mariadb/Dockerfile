@@ -9,5 +9,4 @@ COPY ./conf/50-server.cnf	/etc/mysql/mariadb.conf.d/50-server.cnf
 COPY ./tool/initmysql.sh	initmysql.sh
 
 
-ENTRYPOINT ["sh", "initmysql.sh"]
-CMD ["mysqld"]
+ENTRYPOINT ["bash", "initmysql.sh"]

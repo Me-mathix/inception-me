@@ -1,6 +1,6 @@
 all: 
-	mkdir -p /Users/mathieu/mda-cunh/data/mariadb
-	mkdir -p /Users/mathieu/mda-cunh/data/wordpress
+	mkdir -p /home/mathieu/mda-cunh/data/mariadb
+	mkdir -p /home/mathieu/mda-cunh/data/wordpress
 	@sudo docker compose -f ./srcs/docker-compose.yml build
 	@sudo docker compose -f ./srcs/docker-compose.yml up -d
 
@@ -12,9 +12,9 @@ clean: stop
 	@-sudo docker network rm inception
 
 fclean: clean
-	@sudo rm -rf /Users/mathieu/mda-cunh/data/mariadb/*
-	@sudo rm -rf /Users/mathieu/mda-cunh/data/wordpress/*
-	@docker system prune -af
+	@sudo rm -rf /home/mathieu/mda-cunh/data/mariadb/*
+	@sudo rm -rf /home/mathieu/mda-cunh/data/wordpress/*
+	@sudo docker system prune -af
 
 re: fclean all
 

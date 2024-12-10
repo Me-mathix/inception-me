@@ -1,32 +1,35 @@
 #!/bin/sh
 
-/etc/init.d/mariadb start
+# Start MariaDB directly in foreground
+mysqld_safe --skip-networking &
 
+# Wait for MariaDB to start
+until mysqladmin ping --silent; do
+    echo "Waiting for MariaDB to start..."
+    sleep 2
+done
 
-if [ -d "/var/lib/mysql/$MYSQL_DATABASE" ]
-then 
+# Run mysql_secure_installation commands
+mysql -uroot -p"${SQL_ROOT_PASSWORD}" <<EOF
+ALTER USER 'root'@'localhost' IDENTIFIED BY '${SQL_ROOT_PASSWORD}';
+DELETE FROM mysql.user WHERE User='';
+DROP DATABASE IF EXISTS test;
+DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
+FLUSH PRIVILEGES;
+EOF
 
-	echo "Database already exists"
-else
+# Grant remote access for root and create the user/database
+mysql -uroot -p"${SQL_ROOT_PASSWORD}" <<EOF
+GRANT ALL ON *.* TO 'root'@'%' IDENTIFIED BY '${SQL_ROOT_PASSWORD}';
+FLUSH PRIVILEGES;
 
-mysql_secure_installation << _EOF_
+CREATE DATABASE IF NOT EXISTS ${SQL_DATABASE};
+CREATE USER '${SQL_USER}'@'%' IDENTIFIED BY '${SQL_PASSWORD}';
+GRANT ALL ON ${SQL_DATABASE}.* TO '${SQL_USER}'@'%';
+FLUSH PRIVILEGES;
+EOF
 
-Y
-$MYSQL_ROOT_PASSWORD
-$MYSQL_ROOT_PASSWORD
-Y
-Y
-Y
-Y
-_EOF_
+# Stop MariaDB safely
+mysqladmin -uroot -p"${SQL_ROOT_PASSWORD}" shutdown
 
-
-mysql -uroot -e "GRANT ALL ON *.* TO 'root'@'%' IDENTIFIED BY '$SQL_ROOT_PASSWORD'; FLUSH PRIVILEGES;"
-
-mysql -uroot -e "CREATE DATABASE IF NOT EXISTS $SQL_DATABASE; GRANT ALL ON $SQL_DATABASE.* TO '$SQL_USER'@'%' IDENTIFIED BY '$SQL_PASSWORD'; FLUSH PRIVILEGES;"
-
-fi
-
-/etc/init.d/mariadb stop
-
-exec "$@"
+exec mysqld_safe
